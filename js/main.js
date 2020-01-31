@@ -8,7 +8,7 @@ var white_sun = new THREE.Mesh( white_sun_geometry, white_sun_material );
 
 var MAX_ZOOM_LEVEL = 1000;
 var MIN_ZOOM_LEVEL = 2;
-var ZOOM_DEFAULT_DAMPING = 0.05;
+var ZOOM_DEFAULT_DAMPING = 0.1;
 var ZOOM_QUICK_DAMPING = 0.9;
 
 var zoom_damping = 0.1;
