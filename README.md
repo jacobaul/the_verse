@@ -3,7 +3,7 @@
 
 ## The Verse in Numbers
 This is an unofficial fan project.
-The information contained in planets-moons-info.json is sourced from [The Verse in Numbers v2.1](https://web.archive.org/web/20170618063437/http://pics.fireflyprops.net/TVIN-2.1.pdf), © Universal Studios and Quantum Mechanix Inc.
+The information contained in planets-moons-info.json and stars-info.json is sourced from [The Verse in Numbers v2.1](https://web.archive.org/web/20170618063437/http://pics.fireflyprops.net/TVIN-2.1.pdf), © Universal Studios and Quantum Mechanix Inc.
 
 ## Three.js
 Three.js is Copyright © the three.js authors under MIT License. [See Three.js License](libs/threejs/LICENSE)
