@@ -2,18 +2,17 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 var renderer = new THREE.WebGLRenderer();
 
-var white_sun_geometry = new THREE.SphereGeometry(1,32,32 );
-var white_sun_material = new THREE.MeshStandardMaterial(  );
-var white_sun = new THREE.Mesh( white_sun_geometry, white_sun_material );
-
 var MAX_ZOOM_LEVEL = 1000;
 var MIN_ZOOM_LEVEL = 2;
 var ZOOM_DEFAULT_DAMPING = 0.1;
 var ZOOM_QUICK_DAMPING = 0.9;
 
-var zoom_damping = 0.1;
-var zoom_level = 10.0;
-var zoom_speed = 0.0;
+var ZOOM_DAMPING = 0.1;
+var ZOOM_LEVEL = 10.0;
+var ZOOM_SPEED = 0.0;
+
+var STARS;
+var PLANETS_MOONS;
 
 init();
 animate();
@@ -23,9 +22,26 @@ function init() {
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    scene.add( white_sun );
+    importObjects();
+
+
+    for (star in STARS){
+        var starGeometry = new THREE.SphereGeometry(1,32,32 );
+        var starMaterial = new THREE.MeshStandardMaterial(  );
+        starMaterial.emissive = new THREE.Color("0xadadad");
+        var starObj = new THREE.Mesh( starGeometry, starMaterial );
+
+
+        starObj.position.x = STARS[star]['Distance'];
+        STARS[star]['sceneObj'] = starObj;
+        scene.add(starObj);
+    }
+
+    console.log(STARS['White Sun'])
+
+    //scene.add( white_sun );
     camera.position.z = 5;
-    white_sun_material.emissive = new THREE.Color("0xadadad");
+    //white_sun_material.emissive = new THREE.Color("0xadadad");
 
     window.addEventListener( 'wheel', onMouseWheel, false );
 
@@ -34,37 +50,55 @@ function init() {
 
 function animate() {
     requestAnimationFrame( animate );
-    white_sun.rotation.x += 0.01;
-    white_sun.rotation.y += 0.01;
+    //STARS['Penglai']['sceneObj'].position.add(rotateRelative(8.1, 0.1,0));
+    //white_sun.rotation.x += 0.01;
+    //white_sun.rotation.y += 0.01;
     zoom();
-    camera.lookAt( white_sun.position );
+    camera.lookAt( STARS['White Sun']['sceneObj'].position );
+    
 
 	  renderer.render( scene, camera );
 }
 
 function zoom() {
-    if(zoom_level > MAX_ZOOM_LEVEL || zoom_level < MIN_ZOOM_LEVEL){
-        zoom_damping = ZOOM_QUICK_DAMPING;
+    if(ZOOM_LEVEL > MAX_ZOOM_LEVEL || ZOOM_LEVEL < MIN_ZOOM_LEVEL){
+        ZOOM_DAMPING = ZOOM_QUICK_DAMPING;
     }else{
-        zoom_damping = ZOOM_DEFAULT_DAMPING;
+        ZOOM_DAMPING = ZOOM_DEFAULT_DAMPING;
     }
 
-    zoom_level += zoom_speed;
+    ZOOM_LEVEL += ZOOM_SPEED;
 
-    if(zoom_level < MIN_ZOOM_LEVEL){
-        zoom_level = MIN_ZOOM_LEVEL;
+    if(ZOOM_LEVEL < MIN_ZOOM_LEVEL){
+        ZOOM_LEVEL = MIN_ZOOM_LEVEL;
     }
 
-    zoom_speed  = zoom_speed*(1-zoom_damping);
+    ZOOM_SPEED  = ZOOM_SPEED*(1-ZOOM_DAMPING);
 
-    camera.position.x = Math.sin( .5 * Math.PI * ( .5 ) ) * zoom_level;
-		camera.position.y = Math.sin( .25 * Math.PI * (  .5 ) ) * zoom_level;
-		camera.position.z = Math.cos( .5 * Math.PI * (  .5 ) ) * zoom_level;
+    camera.position.x = Math.sin( .5 * Math.PI * ( .5 ) ) * ZOOM_LEVEL;
+		camera.position.y = Math.sin( .25 * Math.PI * (  .5 ) ) * ZOOM_LEVEL;
+		camera.position.z = Math.cos( .5 * Math.PI * (  .5 ) ) * ZOOM_LEVEL;
 
 
 }
 
+function rotateRelative(r,theta,phi){
+    x = r * Math.sin(theta);
+    y = r * Math.cos(theta);
+    z = r * Math.cos(phi);
+
+    return new THREE.Vector3(x,y,z);
+
+ }
+
+function importObjects(){
+
+    STARS = JSON.parse(stars_info);
+    PLANETS_MOONS = JSON.parse(planet_moon_info);
+
+}
+
 function onMouseWheel( ev ) {
-    zoom_speed = ev.deltaY;
+    ZOOM_SPEED = ev.deltaY;
 
 }
