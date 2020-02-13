@@ -32,7 +32,7 @@ function init() {
         var starObj = new THREE.Mesh( starGeometry, starMaterial );
 
 
-        //starObj.position.x = STARS[star]['Distance'];
+       // starObj.position.x = STARS[star]['Distance'];
         STARS[star]['sceneObj'] = starObj;
 
         STARS[star]['theta'] = 1;
@@ -93,14 +93,22 @@ function updatePosition(star){
 
     var pos = STARS[star]['sceneObj'].position;
 
-    var delt = par.sub(pos);
 
+    var delt = pos - par;
 
+    console.log(delt)
 
-    STARS[star]['theta'] += 1 / (10* STARS[star]['Distance']);
-    STARS[star]['sceneObj'].position.x = STARS[star]['Distance'] * Math.cos(STARS[star]['theta']);
-    STARS[star]['sceneObj'].position.z = STARS[star]['Distance'] * Math.sin(STARS[star]['theta']);
- }
+    var theta = STARS[star]['theta'];
+    var r = STARS[star]['Distance'];
+
+    STARS[star]['theta'] += 1 / (10* theta);
+
+    var deltax = r * Math.cos(theta);
+    var deltaz = r * Math.sin(theta);
+
+    //STARS[star]['sceneObj'].position = delt.add(new THREE.Vector3(deltax,deltaz,0))
+
+}
 
 function importObjects(){
 
@@ -110,6 +118,6 @@ function importObjects(){
 }
 
 function onMouseWheel( ev ) {
-    ZOOM_SPEED = ev.deltaY/50;
+    ZOOM_SPEED = ev.deltaY;
 
 }
