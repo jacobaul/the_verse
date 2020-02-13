@@ -8,7 +8,7 @@ var ZOOM_DEFAULT_DAMPING = 0.1;
 var ZOOM_QUICK_DAMPING = 0.9;
 
 var ZOOM_DAMPING = 0.1;
-var ZOOM_LEVEL = 10.0;
+var ZOOM_LEVEL = 50.0;
 var ZOOM_SPEED = 0.0;
 
 var STARS;
@@ -32,14 +32,15 @@ function init() {
         var starObj = new THREE.Mesh( starGeometry, starMaterial );
 
 
-        starObj.position.x = STARS[star]['Distance'];
+        //starObj.position.x = STARS[star]['Distance'];
         STARS[star]['sceneObj'] = starObj;
+
+        STARS[star]['theta'] = 1;
         scene.add(starObj);
     }
 
-    console.log(STARS['White Sun'])
 
-    //scene.add( white_sun );
+    //STARS['Himinbjorg']['sceneObj'].translateX(4);
     camera.position.z = 5;
     //white_sun_material.emissive = new THREE.Color("0xadadad");
 
@@ -54,8 +55,11 @@ function animate() {
     //white_sun.rotation.x += 0.01;
     //white_sun.rotation.y += 0.01;
     zoom();
+
+    updatePosition('Himinbjorg');
+    //STARS['Himinbjorg']['sceneObj'].translateX(0.001);
+
     camera.lookAt( STARS['White Sun']['sceneObj'].position );
-    
 
 	  renderer.render( scene, camera );
 }
@@ -82,13 +86,20 @@ function zoom() {
 
 }
 
-function rotateRelative(r,theta,phi){
-    x = r * Math.sin(theta);
-    y = r * Math.cos(theta);
-    z = r * Math.cos(phi);
+function updatePosition(star){
 
-    return new THREE.Vector3(x,y,z);
+    var par = STARS[star]['obj_parent'];
+    var parpos = STARS[par]['sceneObj'].position;
 
+    var pos = STARS[star]['sceneObj'].position;
+
+    var delt = par.sub(pos);
+
+
+
+    STARS[star]['theta'] += 1 / (10* STARS[star]['Distance']);
+    STARS[star]['sceneObj'].position.x = STARS[star]['Distance'] * Math.cos(STARS[star]['theta']);
+    STARS[star]['sceneObj'].position.z = STARS[star]['Distance'] * Math.sin(STARS[star]['theta']);
  }
 
 function importObjects(){
@@ -99,6 +110,6 @@ function importObjects(){
 }
 
 function onMouseWheel( ev ) {
-    ZOOM_SPEED = ev.deltaY;
+    ZOOM_SPEED = ev.deltaY/50;
 
 }
