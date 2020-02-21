@@ -26,24 +26,26 @@ function init() {
 
 
     for (star in STARS){
-        var starGeometry = new THREE.SphereGeometry(1,32,32 );
+        var radius = parseFloat(STARS[star]['Radius']) 
+        var starGeometry = new THREE.SphereGeometry(2*radius,16,16 );
         var starMaterial = new THREE.MeshStandardMaterial(  );
         starMaterial.emissive = new THREE.Color("0xadadad");
         var starObj = new THREE.Mesh( starGeometry, starMaterial );
 
 
-       // starObj.position.x = STARS[star]['Distance'];
         STARS[star]['sceneObj'] = starObj;
+        STARS[star]['sceneObj'].position.x = initPosition(star);
 
+        STARS[star]['phi'] = 0;
         STARS[star]['theta'] = 1;
         scene.add(starObj);
     }
 
+    STARS["Blue Sun"]['phi'] = 3;
+    STARS["Burnham"]['phi'] = 3;
+    STARS["Burnham"]['theta'] = 0;
 
-    //STARS['Himinbjorg']['sceneObj'].translateX(4);
     camera.position.z = 5;
-    //white_sun_material.emissive = new THREE.Color("0xadadad");
-
     window.addEventListener( 'wheel', onMouseWheel, false );
 
 }
@@ -51,15 +53,14 @@ function init() {
 
 function animate() {
     requestAnimationFrame( animate );
-    //STARS['Penglai']['sceneObj'].position.add(rotateRelative(8.1, 0.1,0));
-    //white_sun.rotation.x += 0.01;
-    //white_sun.rotation.y += 0.01;
     zoom();
 
-    updatePosition('Himinbjorg');
-    //STARS['Himinbjorg']['sceneObj'].translateX(0.001);
+    for(star in STARS){
+        updatePosition(star);
+    }
 
-    camera.lookAt( STARS['White Sun']['sceneObj'].position );
+
+    camera.lookAt( new THREE.Vector3(0,0,0) );
 
 	  renderer.render( scene, camera );
 }
@@ -89,24 +90,54 @@ function zoom() {
 function updatePosition(star){
 
     var par = STARS[star]['obj_parent'];
-    var parpos = STARS[par]['sceneObj'].position;
-
-    var pos = STARS[star]['sceneObj'].position;
-
-
-    var delt = pos - par;
-
-    console.log(delt)
+    if(par == "N/A"){
+        var parpos = new THREE.Vector3(0,0,0);
+    }else{
+        var parpos = STARS[par]['sceneObj'].position;
+    }
 
     var theta = STARS[star]['theta'];
-    var r = STARS[star]['Distance'];
+    var phi = STARS[star]['phi'];
+    var r = parseFloat(STARS[star]['Distance']);
 
-    STARS[star]['theta'] += 1 / (10* theta);
+    STARS[star]['theta'] += (1 / (10 * Math.sqrt(r))) * Math.cos(phi);
+    STARS[star]['phi'] += (1 / (10 * Math.sqrt(r))) * Math.sin(phi);
 
+    //if(STARS[star]['theta'] > 2*Math.PI){
+    //    STARS[star]['theta'] = STARS[star]['theta'] - 2*Math.PI;
+    //}
+
+
+    //console.log(STARS[star]['theta'])
+
+    STARS[star]['theta'] %= 2*Math.PI;
     var deltax = r * Math.cos(theta);
     var deltaz = r * Math.sin(theta);
+    var deltay = r * Math.sin(phi);
 
-    //STARS[star]['sceneObj'].position = delt.add(new THREE.Vector3(deltax,deltaz,0))
+
+    var newpos = new THREE.Vector3(deltax,deltay,deltaz);
+    newpos.add(parpos);
+
+
+    STARS[star]['sceneObj'].position.x = newpos.x;
+    STARS[star]['sceneObj'].position.z = newpos.z;
+    STARS[star]['sceneObj'].position.y = newpos.y;
+
+}
+
+function initPosition(star){
+
+    if(star == "White Sun"){
+        return 0;
+    }
+
+    var par = STARS[star]['obj_parent'];
+    var parx = parseFloat(STARS[star]['Distance'])  + initPosition(par);
+
+    return parx;
+
+
 
 }
 
