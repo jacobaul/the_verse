@@ -1,9 +1,14 @@
+## Verse Object Database
+I have yet to find a machine-readable database of objects in the Firefly verse. To get the information needed for this project I extracted as much info as I could in as automated a fashion as possible about Moons, Planets, and Stars from  [The Verse in Numbers v2.1](https://web.archive.org/web/20170618063437/http://pics.fireflyprops.net/TVIN-2.1.pdf), (© Universal Studios and Quantum Mechanix Inc.). While surprisingly comprehensive (and of questionable cannon status), it is not machine-readable. Due to the nature of PDF files, the extraction processs is messy and required a fair bit of human intervention to clean. As such there are almost certainly many errors in the resulting json file. Units are not listed but shouldn't be hard to guess (km, AU, Solar Radii).
+
+
+
 ## License and Copyright
 
 
 ### The Verse in Numbers
 This is an unofficial fan project.
-The information contained in ```planets_moons_info.json``` and ```stars_info.json``` is sourced from [The Verse in Numbers v2.1](https://web.archive.org/web/20170618063437/http://pics.fireflyprops.net/TVIN-2.1.pdf), © Universal Studios and Quantum Mechanix Inc.
+The information contained in ```verse_objects.json``` is sourced from [The Verse in Numbers v2.1](https://web.archive.org/web/20170618063437/http://pics.fireflyprops.net/TVIN-2.1.pdf), © Universal Studios and Quantum Mechanix Inc.
 
 ### Three.js
 Three.js is Copyright © the three.js authors under MIT License. [See Three.js License](libs/threejs/LICENSE)

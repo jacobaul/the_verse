@@ -11,8 +11,9 @@ var ZOOM_DAMPING = 0.1;
 var ZOOM_LEVEL = 50.0;
 var ZOOM_SPEED = 0.0;
 
-var STARS;
-var PLANETS_MOONS;
+var SIMSPEED = 0.01;
+
+var CELOBJS;
 
 init();
 animate();
@@ -24,26 +25,43 @@ function init() {
 
     importObjects();
 
+    var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+    scene.add( light );
 
-    for (star in STARS){
-        var radius = parseFloat(STARS[star]['Radius']) 
+
+    for (star in CELOBJS){
+        var radius = parseFloat(CELOBJS[star]['diameter']) 
         var starGeometry = new THREE.SphereGeometry(2*radius,16,16 );
         var starMaterial = new THREE.MeshStandardMaterial(  );
-        starMaterial.emissive = new THREE.Color("0xadadad");
+
+        if(CELOBJS[star]['class'] == 'L'){
+            starMaterial.emissive = new THREE.Color("0xadadad");
+        }
         var starObj = new THREE.Mesh( starGeometry, starMaterial );
 
+        var spriteMap = new THREE.TextureLoader().load( "res/img/marker_sprite_w.png" );
+        var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 
-        STARS[star]['sceneObj'] = starObj;
-        STARS[star]['sceneObj'].position.x = initPosition(star);
+        var sprite = new THREE.Sprite( spriteMaterial );
 
-        STARS[star]['phi'] = 0;
-        STARS[star]['theta'] = 1;
+        sprite.scale = new THREE.Vector3(10,10,10);
+
+        CELOBJS[star]['sceneObj'] = starObj;
+        CELOBJS[star]['sceneObj'].position.x = initPosition(star);
+
+        CELOBJS[star]['sprite'] = sprite;
+
+        CELOBJS[star]['phi'] = 0;
+        CELOBJS[star]['theta'] = 1;
+
         scene.add(starObj);
+        scene.add( sprite );
+
     }
 
-    STARS["Blue Sun"]['phi'] = 3;
-    STARS["Burnham"]['phi'] = 3;
-    STARS["Burnham"]['theta'] = 0;
+    CELOBJS["Blue Sun"]['phi'] = 3;
+    CELOBJS["Burnham"]['phi'] = 3;
+    CELOBJS["Burnham"]['theta'] = 0;
 
     camera.position.z = 5;
     window.addEventListener( 'wheel', onMouseWheel, false );
@@ -55,7 +73,7 @@ function animate() {
     requestAnimationFrame( animate );
     zoom();
 
-    for(star in STARS){
+    for(star in CELOBJS){
         updatePosition(star);
     }
 
@@ -89,28 +107,28 @@ function zoom() {
 
 function updatePosition(star){
 
-    var par = STARS[star]['obj_parent'];
+    var par = CELOBJS[star]['parent'];
     if(par == "N/A"){
         var parpos = new THREE.Vector3(0,0,0);
     }else{
-        var parpos = STARS[par]['sceneObj'].position;
+        var parpos = CELOBJS[par]['sceneObj'].position;
     }
 
-    var theta = STARS[star]['theta'];
-    var phi = STARS[star]['phi'];
-    var r = parseFloat(STARS[star]['Distance']);
+    var theta = CELOBJS[star]['theta'];
+    var phi = CELOBJS[star]['phi'];
+    var r = parseFloat(CELOBJS[star]['orbit_distance']);
 
-    STARS[star]['theta'] += (1 / (10 * Math.sqrt(r))) * Math.cos(phi);
-    STARS[star]['phi'] += (1 / (10 * Math.sqrt(r))) * Math.sin(phi);
+    CELOBJS[star]['theta'] += (SIMSPEED / ( Math.sqrt(r))) * Math.cos(phi);
+    CELOBJS[star]['phi'] += (SIMSPEED / ( Math.sqrt(r))) * Math.sin(phi);
 
-    //if(STARS[star]['theta'] > 2*Math.PI){
-    //    STARS[star]['theta'] = STARS[star]['theta'] - 2*Math.PI;
+    //if(CELOBJS[star]['theta'] > 2*Math.PI){
+    //    CELOBJS[star]['theta'] = CELOBJS[star]['theta'] - 2*Math.PI;
     //}
 
 
-    //console.log(STARS[star]['theta'])
+    //console.log(CELOBJS[star]['theta'])
 
-    STARS[star]['theta'] %= 2*Math.PI;
+    CELOBJS[star]['theta'] %= 2*Math.PI;
     var deltax = r * Math.cos(theta);
     var deltaz = r * Math.sin(theta);
     var deltay = r * Math.sin(phi);
@@ -120,9 +138,11 @@ function updatePosition(star){
     newpos.add(parpos);
 
 
-    STARS[star]['sceneObj'].position.x = newpos.x;
-    STARS[star]['sceneObj'].position.z = newpos.z;
-    STARS[star]['sceneObj'].position.y = newpos.y;
+    CELOBJS[star]['sceneObj'].position.x = newpos.x;
+    CELOBJS[star]['sceneObj'].position.z = newpos.z;
+    CELOBJS[star]['sceneObj'].position.y = newpos.y;
+
+   // CELOBJS[star]['sprite'].position = newpos;
 
 }
 
@@ -132,8 +152,8 @@ function initPosition(star){
         return 0;
     }
 
-    var par = STARS[star]['obj_parent'];
-    var parx = parseFloat(STARS[star]['Distance'])  + initPosition(par);
+    var par = CELOBJS[star]['parent'];
+    var parx = parseFloat(CELOBJS[star]['orbit_distance'])  + initPosition(par);
 
     return parx;
 
@@ -143,8 +163,8 @@ function initPosition(star){
 
 function importObjects(){
 
-    STARS = JSON.parse(stars_info);
-    PLANETS_MOONS = JSON.parse(planet_moon_info);
+    CELOBJS = JSON.parse(verseObjects);
+    console.log(CELOBJS["Bryson's Rock"]);
 
 }
 
