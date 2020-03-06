@@ -10,6 +10,9 @@ I have yet to find a machine-readable database of objects in the Firefly verse. 
 This is an unofficial fan project.
 The information contained in ```verse_objects.json``` is sourced from [The Verse in Numbers v2.1](https://web.archive.org/web/20170618063437/http://pics.fireflyprops.net/TVIN-2.1.pdf), © Universal Studios and Quantum Mechanix Inc.
 
+### specrend.js
+Specrend.js is a JavaScript implementation of a [the same program](https://www.fourmilab.ch/documents/specrend/) by John Walker originally written in C in 1996. Both the original [original C code](https://www.fourmilab.ch/documents/specrend/specrend.c) and the lightly modified implementation by Jacob Aulenback in JavaScript are in the Public Domain.
+
 ### Three.js
 Three.js is Copyright © the three.js authors under MIT License. [See Three.js License](libs/threejs/LICENSE)
 
