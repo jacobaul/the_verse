@@ -45,10 +45,10 @@ function init() {
 
         if(CELOBJS[star]['class'] == 'L'){
 
-            var lambda = CELOBJS[star]["temperature"];
+            var temp = CELOBJS[star]["temperature"];
 
-            if(lambda != null){
-                var rgb = wavelength_to_rgb(lambda);
+            if(temp != null){
+                var rgb = temperature_to_rgb(temp);
                 starMaterial.emissive = new THREE.Color(rgb.r, rgb.g, rgb.b);
             }else{
 

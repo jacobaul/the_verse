@@ -233,7 +233,7 @@ function bb_spectrum(wavelength){
         (Math.exp(1.4388e-2 / (wlm * bbTemp)) - 1.0);
 }
 
-function wavelength_to_rgb(lambda){
+function temperature_to_rgb(lambda){
     var t;
     var x,y,z,r,g,b;
     x = {val:0};
