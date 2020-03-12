@@ -40,7 +40,7 @@
         importObjects();
 
         var light = new THREE.AmbientLight( 0x404040 ); // soft white light
-        //scene.add( light );
+        scene.add( light );
 
 
         for (star in CELOBJS){
@@ -60,6 +60,8 @@
                     starMaterial.emissive = new THREE.Color(0xffffff);
 
                 }
+            }else{
+                starMaterial.color = new THREE.Color(0xffff00);
             }
             var starObj = new THREE.Mesh( starGeometry, starMaterial );
 
@@ -80,9 +82,42 @@
 
             scene.add(starObj);
             scene.add( sprite );
-
         }
 
+        for (star in CELOBJS){
+            if (star != "White Sun"){
+                var parent = CELOBJS[star]["parent"];
+                var testrad = CELOBJS[star]["orbit_distance"];
+                var geometry = new THREE.TorusGeometry( testrad, 0.0005, 2, 64 );
+                var wireframe = new THREE.WireframeGeometry( geometry );
+                var line = new THREE.LineSegments( wireframe );
+
+
+                if(CELOBJS[star]['class'] == 'L'){
+                    var material = new THREE.LineBasicMaterial( {
+	                      color: 0xFF0000,
+	                      linewidth: 0.5,
+                    } );
+                }else{
+                    var material = new THREE.LineBasicMaterial( {
+	                      color: 0x000088,
+	                      linewidth: 0.5,
+                    } );
+
+                }
+                line.material = material;
+
+                line.position.x = CELOBJS[parent]["sceneObj"].position.x;
+                line.position.y = CELOBJS[parent]["sceneObj"].position.y;
+                line.position.z = CELOBJS[parent]["sceneObj"].position.z;
+
+                line.rotateX(Math.PI / 2);
+                CELOBJS[star]["orbit_torus"] = line;
+                scene.add( line);
+
+            }
+
+        }
         CELOBJS["Blue Sun"]['phi'] = 3;
         CELOBJS["Burnham"]['phi'] = 3;
         CELOBJS["Burnham"]['theta'] = 0;
@@ -111,7 +146,6 @@
         for(star in CELOBJS){
             updatePosition(star);
         }
-
         updateCamera();
 
         camera.lookAt( CENTRE);
@@ -154,9 +188,12 @@
         CELOBJS[star]['theta'] += (SIMSPEED / ( Math.sqrt(r))) * Math.cos(phi);
         CELOBJS[star]['phi'] += (SIMSPEED / ( Math.sqrt(r))) * Math.sin(phi);
 
+        if(star != "White Sun"){
+            CELOBJS[star]["orbit_torus"].position.x = parpos.x;
+            CELOBJS[star]["orbit_torus"].position.y = parpos.y;
+            CELOBJS[star]["orbit_torus"].position.z = parpos.z;
+        }
 
-
-        //console.log(CELOBJS[star]['theta'])
 
         CELOBJS[star]['theta'] %= 2*Math.PI;
         var deltax = r * Math.cos(theta);
@@ -236,8 +273,9 @@
 	      // calculate objects intersecting the picking ray
 	      var intersects = RAYCASTER.intersectObjects(scene.children );
 
-		    CENTRE = intersects[ 0 ].object.position;
-
+        if (intersects.length > 0){
+            CENTRE = intersects[ 0 ].object.position;
+        }
     }
 
 
