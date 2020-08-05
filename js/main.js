@@ -8,6 +8,7 @@
 
 
     function init() {
+
         renderer.setSize( window.innerWidth, window.innerHeight );
         document.body.appendChild( renderer.domElement );
 
@@ -61,25 +62,44 @@
         for (star in verseConfig.celObjs){
             if (star != "White Sun"){
                 var parent = verseConfig.celObjs[star]["parent"];
-                var testrad = verseConfig.celObjs[star]["orbit_distance"];
-                var geometry = new THREE.TorusGeometry( testrad, 0.0005, 2, 64 );
-                var wireframe = new THREE.WireframeGeometry( geometry );
-                var line = new THREE.LineSegments( wireframe );
+                var radius = verseConfig.celObjs[star]["orbit_distance"];
+                //var geometry = new THREE.TorusGeometry( testrad, 0.0005, 2, 64 );
+                //var wireframe = new THREE.WireframeGeometry( geometry );
+                //var line = new THREE.LineSegments( wireframe );
 
+                var color = new THREE.Color();
+                var colors = [];
+                var vertices = [];
+
+
+                var segmentCount = 128;
+                var geometry = new THREE.BufferGeometry();
+                var	material = new THREE.LineBasicMaterial( { color: 0xffffff, vertexColors: true } );
 
                 if(verseConfig.celObjs[star]['class'] == 'L'){
-                    var material = new THREE.LineBasicMaterial( {
-	                      color: 0xFF0000,
-	                      linewidth: 0.5,
-                    } );
+                    var h = 1.0;
                 }else{
-                    var material = new THREE.LineBasicMaterial( {
-	                      color: 0x000088,
-	                      linewidth: 0.5,
-                    } );
-
+                  var h = 0.75;
                 }
-                line.material = material;
+
+                for (var i = 0; i <= segmentCount; i++) {
+                    var theta = ((i+20) / segmentCount) * Math.PI * 2;
+
+                    vertices.push(
+                      Math.cos(theta) * radius,
+                      Math.sin(theta) * radius,
+                      0);
+
+                      color.setHSL( h, 1, (i ) / ( 2* segmentCount) );
+                      colors.push( color.r, color.g, color.b );
+
+
+                    }
+
+
+                geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+                geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+                var line = new THREE.Line(geometry, material);
 
                 line.position.x = verseConfig.celObjs[parent]["sceneObj"].position.x;
                 line.position.y = verseConfig.celObjs[parent]["sceneObj"].position.y;
@@ -88,12 +108,14 @@
                 line.rotateX(Math.PI / 2);
                 verseConfig.celObjs[star]["orbit_torus"] = line;
                 scene.add(line);
+              }
 
-            }
+
         }
-        verseConfig.celObjs["Blue Sun"]['phi'] = 3;
-        verseConfig.celObjs["Burnham"]['phi'] = 3;
-        verseConfig.celObjs["Burnham"]['theta'] = 0;
+
+        
+        //Blue Sun orbits backward.
+        verseConfig.celObjs["Blue Sun"]['phi'] = 3.14159;
 
 
         verseConfig.celObjs["Blue Sun"]["sceneObj"].material.emissive = new THREE.Color(177,204,255);
@@ -112,6 +134,7 @@
 
     function animate() {
         requestAnimationFrame( animate );
+
         zoom();
 
         rotate();
@@ -119,6 +142,7 @@
         for(star in verseConfig.celObjs){
             updatePosition(star);
         }
+
         updateCamera();
 
         camera.lookAt( verseConfig.centre);
@@ -128,9 +152,9 @@
 
     function zoom() {
         if(verseConfig.cameraDistance > verseConfig.maxRadius || verseConfig.cameraDistance < verseConfig.minRadius){
-            zoomDamping = verseConfig.zoomQuickDamping;
+            verseConfig.zoomDamping = verseConfig.zoomQuickDamping;
         }else{
-            zoomDamping = verseConfig.zoomSlowDamping;
+            verseConfig.zoomDamping = verseConfig.zoomSlowDamping;
         }
 
         verseConfig.cameraDistance += verseConfig.zoomSpeed;
@@ -139,7 +163,7 @@
             verseConfig.cameraDistance = verseConfig.minRadius;
         }
 
-        verseConfig.zoomSpeed  = verseConfig.zoomSpeed*(1-zoomDamping);
+        verseConfig.zoomSpeed  = verseConfig.zoomSpeed*(1-verseConfig.zoomDamping);
 
 
 
@@ -158,13 +182,17 @@
         var phi = verseConfig.celObjs[star]['phi'];
         var r = parseFloat(verseConfig.celObjs[star]['orbit_distance']);
 
-        verseConfig.celObjs[star]['theta'] += (verseConfig.simSpeed / ( Math.sqrt(r))) * Math.cos(phi);
-        verseConfig.celObjs[star]['phi'] += (verseConfig.simSpeed / ( Math.sqrt(r))) * Math.sin(phi);
+        var dtheta = (verseConfig.simSpeed / ( Math.sqrt(r))) * Math.cos(phi);
+        var dphi = (verseConfig.simSpeed / ( Math.sqrt(r))) * Math.sin(phi);
+
+        verseConfig.celObjs[star]['theta'] += dtheta;
+        verseConfig.celObjs[star]['phi'] += dphi;
 
         if(star != "White Sun"){
             verseConfig.celObjs[star]["orbit_torus"].position.x = parpos.x;
             verseConfig.celObjs[star]["orbit_torus"].position.y = parpos.y;
             verseConfig.celObjs[star]["orbit_torus"].position.z = parpos.z;
+            verseConfig.celObjs[star]["orbit_torus"].rotateZ(dtheta);
         }
 
 
@@ -172,7 +200,6 @@
         var deltax = r * Math.cos(theta);
         var deltaz = r * Math.sin(theta);
         var deltay = r * Math.sin(phi);
-
 
         var newpos = new THREE.Vector3(deltax,deltay,deltaz);
         newpos.add(parpos);
